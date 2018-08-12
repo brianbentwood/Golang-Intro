@@ -59,15 +59,38 @@ func SearchPOST(w http.ResponseWriter, r *http.Request) {
 		SearchGET(w, r)
 		return
 	}
+	if validate, missingField := view.Validate(r, []string{"_zipcode"}); !validate {
+		log.Println("Missing the ", missingField)
+		sess.AddFlash(view.Flash{"Please enter a valid Zipcode!!", view.FlashError})
+		sess.Save(r, w)
+		SearchGET(w, r)
+		return
+	}
 
 	// Get form values
 	//streetaddress := r.FormValue("_address")
 	city := r.FormValue("_city")
 	usstate := r.FormValue("_state")
 	zipcode := r.FormValue("_zipcode")
-	log.Println("City is ", city)
-	log.Println("State is ", usstate)
-	log.Println("Zipcode is ", zipcode)
+
+	//log.Println("City is ", city)
+	//log.Println("State is ", usstate)
+	//log.Println("Zipcode is ", zipcode)
+
+	/*
+			var myClient = &http.Client{Timeout: 10 * time.Second}
+			respgeo, err := http.Get("https://maps.googleapis.com/maps/api/geocode/json?address=" + city + ", " + usstate)
+			if err != nil {
+				log.Println("Z3")
+				// handle error
+			}
+			defer respgeo.Body.Close()
+			json.NewDecoder(respgeo.Body).Decode(target)
+
+		    //https: //maps.googleapis.com/maps/api/geocode/json?address=amsterdam
+
+		    //https: //maps.googleapis.com/maps/api/geocode/json?latlng=52.3182742,4.7288558
+	*/
 
 	now := time.Now()
 	log.Println("Time is ", now)
@@ -112,7 +135,8 @@ func SearchPOST(w http.ResponseWriter, r *http.Request) {
 				v.Vars["_hightemp"] = startSC.HighTemp
 				v.Vars["_lowtemp"] = startSC.LowTemp
 				v.Vars["token"] = csrfbanana.Token(w, r, sess)
-				v.Vars["_ifsrc"] = "https://weather.com/weather/today/l/" + searchcache.Zipcode + ":4:US"
+				//v.Vars["_ifsrc"] = "https://weather.com/weather/today/l/" + searchcache.Zipcode + ":4:US"
+				v.Vars["_ifsrc"] = "https://www.foreca.com/United_States/" + startSC.State + "/" + startSC.City
 				v.Render(w)
 
 				return
@@ -274,7 +298,8 @@ func SearchPOST(w http.ResponseWriter, r *http.Request) {
 		v.Vars["_hightemp"] = newSC.HighTemp
 		v.Vars["_lowtemp"] = newSC.LowTemp
 		v.Vars["token"] = csrfbanana.Token(w, r, sess)
-		v.Vars["_ifsrc"] = "https://weather.com/weather/today/l/" + newSC.Zipcode + ":4:US"
+		//v.Vars["_ifsrc"] = "https://weather.com/weather/today/l/" + newSC.Zipcode + ":4:US"
+		v.Vars["_ifsrc"] = "https://www.foreca.com/United_States/" + newSC.State + "/" + newSC.City
 		v.Render(w)
 		//http.Redirect(w, r, "/search", http.StatusFound)
 		return
