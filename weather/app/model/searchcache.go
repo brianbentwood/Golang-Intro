@@ -15,15 +15,19 @@ import (
 type SearchCache struct {
 	//ObjectID  bson.ObjectId `bson:"_id"`
 	//ID        uint32        `db:"id" bson:"id,omitempty"` // Don't use Id, use UserID() instead for consistency with MongoDB
-	Zipcode   string    `db:"zipcode" bson:"zipcode"`
-	City      string    `db:"city" bson:"city"`
-	State     string    `db:"state" bson:"state"`
-	TimesUsed uint32    `db:"times_used" bson:"times_used"`
-	CurrTemp  string    `db:"currtemp" bson:"currtemp"`
-	HighTemp  string    `db:"hightemp" bson:"hightemp"`
-	LowTemp   string    `db:"lowtemp" bson:"lowtemp"`
-	UpdatedAt time.Time `db:"updated_at" bson:"updated_at"`
-	Deleted   uint8     `db:"deleted" bson:"deleted"`
+	Zipcode     string    `db:"zipcode" bson:"zipcode"`
+	City        string    `db:"city" bson:"city"`
+	State       string    `db:"state" bson:"state"`
+	Address     string    `db:"address" bson:"address"`
+	TimesUsed   uint32    `db:"times_used" bson:"times_used"`
+	CurrTemp    string    `db:"currtemp" bson:"currtemp"`
+	HighTemp    string    `db:"hightemp" bson:"hightemp"`
+	LowTemp     string    `db:"lowtemp" bson:"lowtemp"`
+	Description string    `db:"phrase" bson:"phrase"`
+	Icon        string    `db:"icon" bson:"icon"`
+	IFrameSrc   string    `db:"iframesrc" bson:"iframesrc"`
+	UpdatedAt   time.Time `db:"updated_at" bson:"updated_at"`
+	Deleted     uint8     `db:"deleted" bson:"deleted"`
 }
 
 // ZipcodeID returns the zipcode
@@ -52,7 +56,7 @@ func SearchCacheCreate(_sc SearchCache) error {
 
 	switch database.ReadConfig().Type {
 	case database.TypeMySQL:
-		_, err = database.SQL.Exec("INSERT INTO search_cache (zipcode, times_used, currtemp, hightemp, lowtemp, updated_at) VALUES (?,?,?,?,?,?)", _sc.Zipcode, 1, _sc.CurrTemp, _sc.HighTemp, _sc.LowTemp, now)
+		_, err = database.SQL.Exec("INSERT INTO search_cache (zipcode, times_used, currtemp, hightemp, lowtemp, phrase, icon, iframesrc, updated_at) VALUES (?,?,?,?,?,?,?,?,?)", _sc.Zipcode, 1, _sc.CurrTemp, _sc.HighTemp, _sc.LowTemp, _sc.Description, _sc.Icon, _sc.IFrameSrc, now)
 		/*
 			case database.TypeMongoDB:
 				if database.CheckConnection() {
@@ -105,7 +109,7 @@ func SearchCacheByZipcode(_zipcode string) (SearchCache, error) {
 
 	switch database.ReadConfig().Type {
 	case database.TypeMySQL:
-		err = database.SQL.Get(&result, "SELECT zipcode, times_used, currtemp, hightemp, lowtemp, updated_at, deleted FROM search_cache WHERE zipcode = ? LIMIT 1", _zipcode)
+		err = database.SQL.Get(&result, "SELECT zipcode, times_used, currtemp, hightemp, lowtemp, phrase, icon, iframesrc, updated_at, deleted FROM search_cache WHERE zipcode = ? LIMIT 1", _zipcode)
 		/*
 			case database.TypeMongoDB:
 				if database.CheckConnection() {
@@ -152,7 +156,7 @@ func SearchCacheByAll() ([]SearchCache, error) {
 
 	switch database.ReadConfig().Type {
 	case database.TypeMySQL:
-		err = database.SQL.Select(&result, "SELECT zipcode, times_used, currtemp, hightemp, lowtemp, updated_at, deleted FROM search_cache WHERE deleted = 0")
+		err = database.SQL.Select(&result, "SELECT zipcode, times_used, currtemp, hightemp, lowtemp, phrase, icon, iframesrc, updated_at, deleted FROM search_cache WHERE deleted = 0")
 		/*
 			case database.TypeMongoDB:
 				if database.CheckConnection() {
@@ -207,14 +211,14 @@ func SearchCacheByAll() ([]SearchCache, error) {
 }
 
 // SearchCacheUpdate updates a search_cache
-func SearchCacheUpdate(_zipcode string, _currtemp string, _hightemp string, _lowtemp string, _deleted uint16) error {
+func SearchCacheUpdate(_zipcode string, _currtemp string, _hightemp string, _lowtemp string, _phrase string, _icon string, _iframesrc string, _deleted uint16) error {
 	var err error
 
 	now := time.Now()
 
 	switch database.ReadConfig().Type {
 	case database.TypeMySQL:
-		_, err = database.SQL.Exec("UPDATE search_cache SET times_used = times_used+1, currtemp=?, hightemp=?, lowtemp=?, updated_at=?, deleted=? WHERE zipcode = ? LIMIT 1", _currtemp, _hightemp, _lowtemp, now, _deleted, _zipcode)
+		_, err = database.SQL.Exec("UPDATE search_cache SET times_used = times_used+1, currtemp=?, hightemp=?, lowtemp=?, phrase=?, icon=?, iframesrc=?, updated_at=?, deleted=? WHERE zipcode = ? LIMIT 1", _currtemp, _hightemp, _lowtemp, _phrase, _icon, _iframesrc, now, _deleted, _zipcode)
 		/*
 			case database.TypeMongoDB:
 				if database.CheckConnection() {
