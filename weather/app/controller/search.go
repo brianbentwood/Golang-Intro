@@ -20,8 +20,8 @@ import (
 )
 
 var (
-	mapapiKey       = "AIzaSyB1CYo3hHFIxnL1LDCGTjVC_5Y1TP9dMo8"
-	owmapiKey       = "a0529cc7cec7854b0fe6c4b59c7369b7"
+	mapapiKey       = "<googleapi_key_here>"
+	owmapiKey       = "<openweathermap_api_key_here>"
 	mapaddress      = ""
 	mapcomponents   = ""
 	mapbounds       = ""
